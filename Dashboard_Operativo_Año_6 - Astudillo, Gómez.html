@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="carbon">
+  <title>Dashboard Operativo Año 6 — Pico de Producción | Proyecto Minero 2026</title>
+
+  <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Chart.js 4.5.1 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Page and surfaces - IBM Carbon Light Gray 10 Ramp */
+      --background: #ffffff;
+      --surface-container-low: #f4f4f4;
+      --surface-container: #f4f4f4;
+      --surface-container-high: #e0e0e0;
+      --surface-container-highest: #d0d0d0;
+
+      /* Ink */
+      --on-surface: #161616;
+      --on-surface-variant: #525252;
+      --on-surface-muted: #8d8d8d;
+
+      /* Rules */
+      --outline: #8d8d8d;
+      --outline-variant: #e0e0e0;
+
+      /* Accents */
+      --primary: #0f62fe;
+      --on-primary: #ffffff;
+      --primary-container: #d0e2ff;
+      --on-primary-container: #161616;
+      --secondary: #6f6f6f;
+      --tertiary: #198038;
+      --error: #da1e28;
+      --warning: #b28600;
+      --positive: #198038;
+
+      /* Data series */
+      --data-1: #0f62fe;
+      --data-2: #6929c4;
+      --data-3: #005d5d;
+      --data-4: #9f1853;
+      --data-5: #198038;
+      --data-context: #8d8d8d;
+
+      /* Focus & field lines */
+      --focus: #0f62fe;
+      --rule: 1px solid var(--outline-variant);
+      --field-rule: 1px solid var(--outline);
+      --indicator: 2px solid var(--primary);
+
+      /* Typography */
+      --font-headline: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-label: 'IBM Plex Mono', monospace;
+
+      /* Shape - Strict square enterprise design */
+      --rounded: 0px;
+      --rounded-sm: 0px;
+      --rounded-lg: 0px;
+      --rounded-full: 9999px;
+
+      /* Shadows (only for floating elements) */
+      --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.1);
+      --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    /* Base Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      overflow-x: clip;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      position: static !important;
+    }
+
+    /* Layout Container */
+    .dashboard-wrapper {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-md) var(--space-lg) var(--space-2xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    /* Masthead & System Bar */
+    .masthead {
+      border-bottom: 1px solid var(--outline-variant);
+      padding-bottom: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .masthead-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .meta-breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-variant);
+    }
+
+    .meta-breadcrumbs span.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .meta-system-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      background-color: var(--surface-container-high);
+      border-left: 3px solid var(--positive);
+      font-weight: 500;
+      color: var(--on-surface);
+    }
+
+    .masthead-title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      padding-top: var(--space-xs);
+    }
+
+    .title-group h1 {
+      font-family: var(--font-headline);
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--on-surface);
+    }
+
+    .title-group h1 strong {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .title-group p {
+      font-size: 0.95rem;
+      color: var(--on-surface-variant);
+      margin-top: 4px;
+      max-width: 80ch;
+    }
+
+    .masthead-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .carbon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      height: 40px;
+      padding: 0 var(--space-md);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 400;
+      cursor: pointer;
+      border: none;
+      border-radius: 0;
+      transition: background-color var(--dur-micro) var(--ease-out);
+      text-decoration: none;
+    }
+
+    .carbon-btn-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+    }
+    .carbon-btn-primary:hover {
+      background-color: #0353e9;
+    }
+
+    .carbon-btn-secondary {
+      background-color: var(--surface-container-high);
+      color: var(--on-surface);
+      border: 1px solid var(--outline-variant);
+    }
+    .carbon-btn-secondary:hover {
+      background-color: #d4d4d4;
+    }
+
+    /* KPI Ribbon */
+    .kpi-ribbon {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: var(--space-md);
+    }
+
+    .kpi-card {
+      background-color: var(--surface-container);
+      padding: var(--space-md);
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      border-bottom: 2px solid var(--outline-variant);
+      transition: background-color var(--dur-micro) var(--ease-out);
+    }
+
+    .kpi-card:hover {
+      background-color: #ececec;
+    }
+
+    .kpi-card.highlight-blue {
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .kpi-card.highlight-green {
+      border-bottom: 2px solid var(--positive);
+    }
+
+    .kpi-card.highlight-yellow {
+      border-bottom: 2px solid var(--warning);
+    }
+
+    .kpi-card.highlight-purple {
+      border-bottom: 2px solid var(--data-2);
+    }
+
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-xs);
+    }
+
+    .kpi-label {
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-variant);
+      font-weight: 500;
+    }
+
+    .kpi-icon {
+      color: var(--on-surface-variant);
+      display: flex;
+      align-items: center;
+    }
+
+    .kpi-value {
+      font-family: var(--font-label);
+      font-size: 1.75rem;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      color: var(--on-surface);
+      line-height: 1.15;
+      margin: var(--space-xs) 0 4px;
+    }
+
+    .kpi-subtext {
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      line-height: 1.3;
+    }
+
+    .kpi-subtext strong {
+      color: var(--on-surface);
+      font-weight: 600;
+    }
+
+    /* Section Structure */
+    .dashboard-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .section-header {
+      border-bottom: 1px solid var(--outline-variant);
+      padding-bottom: var(--space-xs);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .section-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .section-tag {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .section-title {
+      font-family: var(--font-headline);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      letter-spacing: -0.01em;
+    }
+
+    .section-desc {
+      font-size: 0.85rem;
+      color: var(--on-surface-variant);
+    }
+
+    /* 12-Column Grid Helpers */
+    .grid-12 {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .col-4 { grid-column: span 4; }
+    .col-5 { grid-column: span 5; }
+    .col-6 { grid-column: span 6; }
+    .col-7 { grid-column: span 7; }
+    .col-8 { grid-column: span 8; }
+    .col-12 { grid-column: span 12; }
+
+    /* Carbon Card / Layer */
+    .carbon-card {
+      background-color: var(--surface-container);
+      border-radius: 0;
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .carbon-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--outline-variant);
+      padding-bottom: var(--space-xs);
+      margin-bottom: var(--space-xs);
+    }
+
+    .card-title {
+      font-family: var(--font-headline);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .card-unit {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-muted);
+    }
+
+    /* Visual Pit Schematic (SVG Section) */
+    .pit-schematic-wrap {
+      background-color: #ffffff;
+      border: 1px solid var(--outline-variant);
+      padding: var(--space-md);
+      position: relative;
+    }
+
+    .schematic-svg {
+      width: 100%;
+      height: 330px;
+      display: block;
+    }
+
+    .bench-interactive-rect {
+      cursor: pointer;
+      transition: fill 0.15s ease, opacity 0.15s ease;
+    }
+    .bench-interactive-rect:hover {
+      filter: brightness(0.92);
+    }
+
+    .schematic-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      padding-top: var(--space-sm);
+      border-top: 1px solid var(--outline-variant);
+      margin-top: var(--space-sm);
+      font-size: 0.75rem;
+      font-family: var(--font-label);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+    }
+
+    /* Bench Detail Box */
+    .bench-detail-pane {
+      background-color: var(--surface-container-high);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      border-left: 3px solid var(--primary);
+    }
+
+    .bench-detail-title {
+      font-family: var(--font-label);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bench-spec-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-xs) var(--space-md);
+      margin-top: 4px;
+    }
+
+    .spec-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .spec-k {
+      font-family: var(--font-label);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
+    .spec-v {
+      font-family: var(--font-label);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--on-surface);
+    }
+
+    /* Tables */
+    .carbon-table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .carbon-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.825rem;
+      text-align: left;
+    }
+
+    .carbon-table th {
+      background-color: var(--surface-container-high);
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-variant);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--outline-variant);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .carbon-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--outline-variant);
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .carbon-table tr:nth-child(even) td {
+      background-color: #fafafa;
+    }
+
+    .carbon-table tr:hover td {
+      background-color: var(--primary-container);
+    }
+
+    .carbon-table td.mono {
+      font-family: var(--font-label);
+    }
+
+    .carbon-table td.text-right, .carbon-table th.text-right {
+      text-align: right;
+    }
+
+    /* Tag pills */
+    .carbon-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 8px;
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      font-weight: 500;
+      border-radius: var(--rounded-full);
+      background-color: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+
+    .carbon-tag.green {
+      background-color: #defbe6;
+      color: #0e6027;
+    }
+
+    .carbon-tag.purple {
+      background-color: #f1c21b;
+      color: #161616;
+    }
+
+    .carbon-tag.gray {
+      background-color: #e0e0e0;
+      color: #393939;
+    }
+
+    /* Mass Flow Diagram */
+    .mass-flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 40px 1.2fr 40px 1fr;
+      align-items: center;
+      gap: var(--space-xs);
+      background: #ffffff;
+      padding: var(--space-md);
+      border: 1px solid var(--outline-variant);
+    }
+
+    .flow-node {
+      background-color: var(--surface-container);
+      padding: var(--space-sm) var(--space-md);
+      border-left: 3px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .flow-node.waste {
+      border-left-color: var(--data-context);
+    }
+
+    .flow-node.stock {
+      border-left-color: var(--warning);
+    }
+
+    .flow-node.plant {
+      border-left-color: var(--positive);
+      background-color: #f6fcf8;
+    }
+
+    .flow-node-title {
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+
+    .flow-node-val {
+      font-family: var(--font-label);
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--on-surface);
+    }
+
+    .flow-node-desc {
+      font-size: 0.72rem;
+      color: var(--on-surface-variant);
+    }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--outline);
+    }
+
+    /* Simulation Control Slider */
+    .sim-panel {
+      background-color: #ffffff;
+      border: 1px solid var(--outline-variant);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .sim-control-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-md);
+      align-items: center;
+    }
+
+    .sim-slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      margin-bottom: 4px;
+    }
+
+    .carbon-range {
+      width: 100%;
+      height: 6px;
+      background: var(--surface-container-high);
+      border-radius: 0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .carbon-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--primary);
+      cursor: pointer;
+      border: none;
+      border-radius: 0;
+    }
+
+    .sim-results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
+      margin-top: var(--space-xs);
+    }
+
+    .sim-result-box {
+      background-color: var(--surface-container);
+      padding: var(--space-sm);
+      border-top: 2px solid var(--primary);
+    }
+
+    .sim-result-k {
+      font-family: var(--font-label);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
+    .sim-result-v {
+      font-family: var(--font-label);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--on-surface);
+      margin-top: 2px;
+    }
+
+    /* Match Factor Dial / Box */
+    .mf-display-card {
+      background-color: #ffffff;
+      border: 1px solid var(--outline-variant);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      height: 100%;
+    }
+
+    .mf-score-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-sm);
+    }
+
+    .mf-score {
+      font-family: var(--font-label);
+      font-size: 2.75rem;
+      font-weight: 300;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .mf-status-badge {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      background-color: #defbe6;
+      color: #0e6027;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mf-bar-wrap {
+      width: 100%;
+      height: 10px;
+      background-color: var(--surface-container-high);
+      position: relative;
+    }
+
+    .mf-bar-fill {
+      height: 100%;
+      background-color: var(--primary);
+      width: 77.1%;
+      transition: width var(--dur-short) var(--ease-out);
+    }
+
+    .mf-bar-target {
+      position: absolute;
+      top: -3px;
+      left: 80%;
+      width: 2px;
+      height: 16px;
+      background-color: #161616;
+    }
+
+    /* Chart Containers */
+    .chart-container-box {
+      position: relative;
+      width: 100%;
+      min-height: 250px;
+      background-color: #ffffff;
+      border: 1px solid var(--outline-variant);
+      padding: var(--space-md);
+    }
+
+    /* Fleet Cards Grid */
+    .fleet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-md);
+    }
+
+    .fleet-unit-card {
+      background-color: var(--surface-container);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      border-left: 3px solid var(--outline);
+    }
+
+    .fleet-unit-card.primary-unit {
+      border-left-color: var(--primary);
+      background-color: #f7f9ff;
+    }
+
+    .fleet-unit-card.drill-unit {
+      border-left-color: var(--data-2);
+    }
+
+    .fleet-unit-card.support-unit {
+      border-left-color: var(--tertiary);
+    }
+
+    .fleet-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .fleet-model {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--on-surface);
+    }
+
+    .fleet-qty {
+      font-family: var(--font-label);
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--primary);
+    }
+
+    .fleet-unit-desc {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+      line-height: 1.35;
+    }
+
+    .fleet-metrics-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xs);
+      margin-top: var(--space-xs);
+      padding-top: var(--space-xs);
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    .fleet-m-k {
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: var(--on-surface-muted);
+    }
+
+    .fleet-m-v {
+      font-family: var(--font-label);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--on-surface);
+    }
+
+    /* Cost Summary Banner */
+    .cost-summary-box {
+      background-color: #ffffff;
+      border: 1px solid var(--outline-variant);
+      border-left: 4px solid var(--primary);
+      padding: var(--space-md);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+      align-items: center;
+    }
+
+    .cost-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cost-k {
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
+    .cost-v {
+      font-family: var(--font-label);
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--on-surface);
+    }
+
+    .cost-sub {
+      font-size: 0.72rem;
+      color: var(--on-surface-variant);
+    }
+
+    /* Notification Ribbon */
+    .carbon-notification {
+      background-color: var(--surface-container);
+      border-left: 3px solid var(--primary);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: 0.825rem;
+    }
+
+    .carbon-notification.warning {
+      border-left-color: var(--warning);
+    }
+
+    .notif-title {
+      font-weight: 600;
+      color: var(--on-surface);
+    }
+
+    .notif-desc {
+      color: var(--on-surface-variant);
+    }
+
+    /* Footer */
+    .dashboard-footer {
+      border-top: 1px solid var(--outline-variant);
+      padding-top: var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      color: var(--on-surface-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .col-8, .col-7, .col-6, .col-5, .col-4 {
+        grid-column: span 12;
+      }
+      .mass-flow-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+      }
+      .flow-arrow {
+        transform: rotate(90deg);
+        padding: 4px 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .dashboard-wrapper {
+        padding: var(--space-sm);
+      }
+      .kpi-ribbon {
+        grid-template-columns: 1fr;
+      }
+      .sim-control-row {
+        grid-template-columns: 1fr;
+      }
+      .sim-results-grid {
+        grid-template-columns: 1fr;
+      }
+      .title-group h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+
+    <!-- 1. MASTHEAD & HERO HEADER -->
+    <header class="masthead">
+      <div class="masthead-meta">
+        <div class="meta-breadcrumbs">
+          <span>Proyecto Minero 2026</span>
+          <i data-lucide="chevron-right" style="width:12px;height:12px;"></i>
+          <span>Planificación Operativa 	</span>
+          <i data-lucide="chevron-right" style="width:12px;height:12px;"></i>
+          <span class="active">Año 6 — Régimen Pleno</span>
+        </div>
+        <div class="meta-system-status">
+          <span class="status-badge">
+            <i data-lucide="check-circle-2" style="width:14px;height:14px;color:var(--positive);"></i>
+            PICO DE PRODUCCIÓN ACTIVO
+          </span>
+          <span>8.760 HS/AÑO &bull; 2 TURNOS &times; 12H &bull; 365 DÍAS</span>
+        </div>
+      </div>
+
+      <div class="masthead-title-row">
+        <div class="title-group">
+          <h1>Año 6: <strong>Dashboard Táctico </strong> - Pico de Producción y Máxima Exigencia Minera</h1>
+          <p>
+            Monitoreo operacional del período de máxima tasa de extracción del LOM (43,29 Mt movilizadas). 
+            Control y plan táctico - Pushbacks PB2, PB3 y PB4, balance de stockpile y MF de flota pesada.
+          </p>
+        </div>
+        <div class="masthead-actions">
+          <button class="carbon-btn carbon-btn-secondary" onclick="window.print()">
+            <i data-lucide="printer" style="width:16px;height:16px;"></i>
+            Imprimir Reporte
+          </button>
+          <button class="carbon-btn carbon-btn-primary" onclick="resetSimulator()">
+            <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i>
+            Restablecer Parámetros
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. KPI RIBBON (HERO CARDS CON INDICADOR 2PX Y FUENTE IBM PLEX MONO) -->
+    <section class="kpi-ribbon" aria-label="Indicadores Clave de Rendimiento Año 6">
+      
+      <!-- KPI 1: Ingresos Brutos -->
+      <div class="kpi-card highlight-blue">
+        <div class="kpi-header">
+          <span class="kpi-label">Ingresos Brutos</span>
+          <span class="kpi-icon"><i data-lucide="dollar-sign" style="width:16px;height:16px;"></i></span>
+        </div>
+        <div class="kpi-value">$506,00 <span style="font-size:1rem;color:var(--on-surface-variant);">M</span></div>
+        <div class="kpi-subtext">
+          <strong>4,60 Mt</strong> concentrado @ <strong>$110/t</strong> comercial
+        </div>
+      </div>
+
+      <!-- KPI 2: EBITDA Operativo -->
+      <div class="kpi-card highlight-green">
+        <div class="kpi-header">
+          <span class="kpi-label">EBITDA Operativo</span>
+          <span class="kpi-icon"><i data-lucide="trending-up" style="width:16px;height:16px;"></i></span>
+        </div>
+        <div class="kpi-value">$370,70 <span style="font-size:1rem;color:var(--on-surface-variant);">M</span></div>
+        <div class="kpi-subtext">
+          Margen EBITDA: <strong>73,3%</strong> | OPEX: $135,30 M
+        </div>
+      </div>
+
+      <!-- KPI 3: Movilización Total -->
+      <div class="kpi-card highlight-purple">
+        <div class="kpi-header">
+          <span class="kpi-label">Movilización en Pit</span>
+          <span class="kpi-icon"><i data-lucide="layers" style="width:16px;height:16px;"></i></span>
+        </div>
+        <div class="kpi-value">43,29 <span style="font-size:1rem;color:var(--on-surface-variant);">Mt</span></div>
+        <div class="kpi-subtext">
+          <strong>43.290.986 tn</strong> (Récord histórico LOM)
+        </div>
+      </div>
+
+      <!-- KPI 4: Stripping Ratio -->
+      <div class="kpi-card highlight-yellow">
+        <div class="kpi-header">
+          <span class="kpi-label">Stripping Ratio (REM)</span>
+          <span class="kpi-icon"><i data-lucide="split" style="width:16px;height:16px;"></i></span>
+        </div>
+        <div class="kpi-value">9,01 <span style="font-size:1rem;color:var(--on-surface-variant);">t/t</span></div>
+        <div class="kpi-subtext">
+          38,96 Mt estéril / 4,33 Mt mineral directo
+        </div>
+      </div>
+
+      <!-- KPI 5: Match Factor -->
+      <div class="kpi-card highlight-blue">
+        <div class="kpi-header">
+          <span class="kpi-label">Match Factor (Pala/CAEX)</span>
+          <span class="kpi-icon"><i data-lucide="cpu" style="width:16px;height:16px;"></i></span>
+        </div>
+        <div class="kpi-value">0,771</div>
+        <div class="kpi-subtext">
+          3 Palas CAT 6040 vs <strong>18 Camiones</strong> CAT 789
+        </div>
+      </div>
+
+      <!-- KPI 6: Calidad Metalúrgica -->
+      <div class="kpi-card highlight-green">
+        <div class="kpi-header">
+          <span class="kpi-label">Calidad Metalúrgica</span>
+          <span class="kpi-icon"><i data-lucide="gem" style="width:16px;height:16px;"></i></span>
+        </div>
+        <div class="kpi-value">62,0% <span style="font-size:0.95rem;color:var(--on-surface-variant);">Fe</span></div>
+        <div class="kpi-subtext">
+          Recuperación: <strong>82,0%</strong> | Ley cabeza 32-35%
+        </div>
+      </div>
+
+      <!-- KPI 7: Eficiencia de Flota -->
+      <div class="kpi-card highlight-blue">
+        <div class="kpi-header">
+          <span class="kpi-label">Disponibilidad / Utiliz.</span>
+          <span class="kpi-icon"><i data-lucide="gauge" style="width:16px;height:16px;"></i></span>
+        </div>
+        <div class="kpi-value">85 / 83 <span style="font-size:0.95rem;color:var(--on-surface-variant);">%</span></div>
+        <div class="kpi-subtext">
+          Disp: <strong>85,0%</strong> | Utilización efectiva: <strong>82,5%</strong>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 3. GEOMETRÍA DE FOSO Y BANCOS EN EXPLOTACIÓN (PUSHBACKS Y COTAS) -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">Módulo 01 &bull; Geomecánica y Secuenciamiento</span>
+          <h2 class="section-title">Geometría de Foso y Bancos en Explotación (Cotas y Pushbacks)</h2>
+        </div>
+        <span class="section-desc">Cota media de minado: 800 m s.n.m. | Distancia banco a puerta pit: 1,00 km | Pendiente de rampa: 8%</span>
+      </div>
+
+      <div class="grid-12">
+        <!-- Columna Izquierda: Esquema SVG Interactivo de Corte de Foso -->
+        <div class="col-8">
+          <div class="carbon-card">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="mountain" style="width:16px;height:16px;color:var(--primary);"></i>
+                Corte Transversal Esquemático del Pit en Año 6 (Pushbacks PB2, PB3 y PB4)
+              </span>
+              <span class="card-unit">Haga clic en un banco para inspeccionar</span>
+            </div>
+
+            <div class="pit-schematic-wrap">
+              <svg class="schematic-svg" viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+                <!-- Fondo topográfico de referencia -->
+                <defs>
+                  <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#f8f9fa"/>
+                    <stop offset="100%" stop-color="#ffffff"/>
+                  </linearGradient>
+                  <pattern id="stripesOre" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <rect width="5" height="10" fill="#0f62fe" opacity="0.15"/>
+                    <rect x="5" width="5" height="10" fill="#ffffff" opacity="0.1"/>
+                  </pattern>
+                </defs>
+
+                <rect x="0" y="0" width="800" height="320" fill="url(#skyGrad)"/>
+
+                <!-- Línea de cota de terreno original (900 m) -->
+                <line x1="20" y1="40" x2="780" y2="40" stroke="#8d8d8d" stroke-dasharray="4 4" stroke-width="1"/>
+                <text x="30" y="34" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#525252">COTA SUP. 900 m (CRESTA ORIGINAL PIT)</text>
+
+                <!-- Puerta de Pit / Salida hacia Botadero y Planta (Cota 880-900) -->
+                <rect x="680" y="30" width="100" height="30" fill="#e0e0e0" stroke="#8d8d8d" stroke-width="1"/>
+                <text x="730" y="48" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="600" text-anchor="middle" fill="#161616">PUERTA PIT</text>
+                <text x="730" y="58" font-family="'IBM Plex Mono', monospace" font-size="8" text-anchor="middle" fill="#525252">KM 0,00</text>
+
+                <!-- Rampa de acarreo (Pendiente 8%) -->
+                <path d="M 680 45 L 560 110 L 450 170 L 350 230 L 220 270" fill="none" stroke="#b28600" stroke-width="4" stroke-dasharray="6 3"/>
+                <text x="560" y="100" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#b28600" font-weight="600">RAMPA DE TRANSPORTE (8% - 1,00 KM)</text>
+
+                <!-- Talud General Oeste -->
+                <path d="M 40 40 L 120 110 L 180 180 L 220 270" fill="none" stroke="#525252" stroke-width="2"/>
+
+                <!-- PB4: Banco 840 (Desarrollo y Destape Superior) -->
+                <g class="bench-interactive-rect" onclick="selectBench('PB4', '840', 'Destape Superior', '3.850.000 tn', 'Estéril predominante', '1 Pala CAT 6040 + 5 CAT 789', '840 m', '1,35 km')">
+                  <polygon points="120,110 240,110 260,140 140,140" fill="#f4f4f4" stroke="#8d8d8d" stroke-width="1.5"/>
+                  <text x="180" y="128" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="600" fill="#161616" text-anchor="middle">PB4: B840</text>
+                </g>
+
+                <!-- PB3: Banco 840 (Frente de Avance) -->
+                <g class="bench-interactive-rect" onclick="selectBench('PB3', '840', 'Frente de Avance', '8.920.000 tn', 'Estéril y transición', '1 Pala CAT 6040 + 6 CAT 789', '840 m', '1,10 km')">
+                  <polygon points="340,110 480,110 500,140 360,140" fill="#e0e0e0" stroke="#0f62fe" stroke-width="1.5"/>
+                  <text x="420" y="128" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="600" fill="#0f62fe" text-anchor="middle">PB3: B840</text>
+                </g>
+
+                <!-- PB2: Bancos 800 a 760 (Cota Profunda de Mineral de Alta Ley) -->
+                <g class="bench-interactive-rect" onclick="selectBench('PB2', '800-760', 'Extracción Mineral Profundo', '30.520.986 tn', 'Mineral 4,33 Mt + Estéril 26,19 Mt', '1 Pala CAT 6040 + 7 CAT 789', '780 m media', '0,85 km')">
+                  <polygon points="180,180 380,180 420,270 220,270" fill="url(#stripesOre)" stroke="#0f62fe" stroke-width="2"/>
+                  <rect x="220" y="210" width="160" height="40" fill="#ffffff" opacity="0.9" stroke="#0f62fe" stroke-width="1"/>
+                  <text x="300" y="228" font-family="'IBM Plex Mono', monospace" font-size="11" font-weight="700" fill="#0f62fe" text-anchor="middle">PB2: BANCOS 800 - 760</text>
+                  <text x="300" y="242" font-family="'IBM Plex Mono', monospace" font-size="9" fill="#161616" text-anchor="middle">NÚCLEO DE MINERAL (4,33 Mt Fe)</text>
+                </g>
+
+                <!-- Ejes de cotas de referencia en la izquierda -->
+                <line x1="60" y1="40" x2="60" y2="280" stroke="#8d8d8d" stroke-width="1"/>
+                <circle cx="60" cy="40" r="3" fill="#161616"/>
+                <text x="50" y="44" font-family="'IBM Plex Mono', monospace" font-size="9" text-anchor="end" fill="#525252">900 m</text>
+                
+                <circle cx="60" cy="110" r="3" fill="#161616"/>
+                <text x="50" y="114" font-family="'IBM Plex Mono', monospace" font-size="9" text-anchor="end" fill="#525252">840 m</text>
+                
+                <circle cx="60" cy="180" r="3" fill="#0f62fe"/>
+                <text x="50" y="184" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="600" text-anchor="end" fill="#0f62fe">800 m (Media)</text>
+                
+                <circle cx="60" cy="270" r="3" fill="#da1e28"/>
+                <text x="50" y="274" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="600" text-anchor="end" fill="#da1e28">760 m (Fondo)</text>
+
+                <!-- Línea de cota media resaltada -->
+                <line x1="60" y1="180" x2="740" y2="180" stroke="#0f62fe" stroke-dasharray="2 2" stroke-width="1" opacity="0.6"/>
+              </svg>
+
+              <div class="schematic-legend">
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:#0f62fe;opacity:0.6;"></span>
+                  <span>PB2 (Bancos 800-760: Cota Profunda Mineral)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:#e0e0e0;border:1px solid #0f62fe;"></span>
+                  <span>PB3 (Banco 840: Frente de Avance)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:#f4f4f4;border:1px solid #8d8d8d;"></span>
+                  <span>PB4 (Banco 840: Destape Superior)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:#b28600;"></span>
+                  <span>Rampa 8% (Distancia banco-puerta: 1,00 km)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Inspector de Banco y Ficha Geotécnica -->
+        <div class="col-4">
+          <div class="carbon-card" style="height:100%;justify-content:space-between;">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="info" style="width:16px;height:16px;color:var(--primary);"></i>
+                Ficha Técnica de Extracción
+              </span>
+              <span class="card-unit" id="benchDetailCode">PB2: B800-760</span>
+            </div>
+
+            <div class="bench-detail-pane" id="benchDetailBox">
+              <div class="bench-detail-title">
+                <span id="benchDetailTitle">Pushback 2 (Bancos 800 - 760)</span>
+                <span class="carbon-tag green" id="benchDetailTag">Mineral / Estéril</span>
+              </div>
+              <div class="bench-spec-list">
+                <div class="spec-item">
+                  <span class="spec-k">Cota Operativa</span>
+                  <span class="spec-v" id="benchSpecCota">760 a 800 m</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Dist. Puerta Pit</span>
+                  <span class="spec-v" id="benchSpecDist">1,00 km</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Material Objetivo</span>
+                  <span class="spec-v" id="benchSpecMaterial">Mineral 4,33 Mt</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Asignación Equipos</span>
+                  <span class="spec-v" id="benchSpecFlota">1 Pala 6040 + 7 CAEX</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabla Resumen de Pushbacks del Año 6 -->
+            <div class="carbon-table-container">
+              <table class="carbon-table">
+                <thead>
+                  <tr>
+                    <th>Fase (PB)</th>
+                    <th>Bancos</th>
+                    <th>Cota</th>
+                    <th class="text-right">Rol Operativo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="cursor:pointer;" onclick="selectBench('PB2', '800-760', 'Extracción Mineral Profundo', '30.520.986 tn', 'Mineral 4,33 Mt + Estéril 26,19 Mt', '1 Pala CAT 6040 + 7 CAT 789', '780 m media', '0,85 km')">
+                    <td><strong style="color:var(--primary);">PB2</strong></td>
+                    <td class="mono">800 - 760</td>
+                    <td class="mono">760 m</td>
+                    <td class="text-right"><span class="carbon-tag green">Mineral</span></td>
+                  </tr>
+                  <tr style="cursor:pointer;" onclick="selectBench('PB3', '840', 'Frente de Avance', '8.920.000 tn', 'Estéril y transición', '1 Pala CAT 6040 + 6 CAT 789', '840 m', '1,10 km')">
+                    <td><strong style="color:var(--on-surface);">PB3</strong></td>
+                    <td class="mono">840</td>
+                    <td class="mono">840 m</td>
+                    <td class="text-right"><span class="carbon-tag gray">Avance</span></td>
+                  </tr>
+                  <tr style="cursor:pointer;" onclick="selectBench('PB4', '840', 'Desarrollo y Destape Superior', '3.850.000 tn', 'Estéril predominante', '1 Pala CAT 6040 + 5 CAT 789', '840 m', '1,35 km')">
+                    <td><strong style="color:var(--on-surface);">PB4</strong></td>
+                    <td class="mono">840</td>
+                    <td class="mono">840 m</td>
+                    <td class="text-right"><span class="carbon-tag purple">Destape</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="carbon-notification" style="margin-top:auto;">
+              <i data-lucide="shield-alert" style="width:16px;height:16px;color:var(--warning);flex-shrink:0;"></i>
+              <div>
+                <span class="notif-title">Parámetro de Rampa:</span>
+                <span class="notif-desc"> Ancho de plataforma 30 m, berma de seguridad 6 m, pendiente rasante del 8,0% hacia portal de salida.</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. BALANCE DE MASAS, TONELAJES Y DESTINOS CON SIMULADOR DINÁMICO -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">Módulo 02 &bull; Movimiento de Tierras y Alimentación</span>
+          <h2 class="section-title">Balance de Masas, Tonelajes Totales y Asignación por Destino</h2>
+        </div>
+        <span class="section-desc">Extracción foso: 43.290.986 tn | Capacidad de planta: 4.600.000 tn | Consumo stockpile de amortiguación: 273.622 tn</span>
+      </div>
+
+      <!-- Diagrama de Flujo de Masas Interactivo -->
+      <div class="mass-flow-grid">
+        <!-- Nodo Origen Mina -->
+        <div class="flow-node">
+          <span class="flow-node-title">Origen: Foso Minero (Pit)</span>
+          <span class="flow-node-val mono" id="nodePitTotal">43,29 Mt</span>
+          <span class="flow-node-desc">43.290.986 tn movilizadas en 3 pushbacks</span>
+        </div>
+
+        <div class="flow-arrow">
+          <i data-lucide="arrow-right" style="width:24px;height:24px;"></i>
+        </div>
+
+        <!-- Nodo Clasificación Mineral / Estéril -->
+        <div class="flow-node" style="border-left-color: var(--secondary);">
+          <span class="flow-node-title">Despacho en Boca de Pit</span>
+          <div style="display:flex; justify-content:space-between; margin-top:2px;">
+            <div>
+              <div style="font-size:0.68rem; color:var(--on-surface-variant);">MINERAL DIRECTO (9,99%)</div>
+              <div class="mono" style="font-weight:600; color:var(--primary);" id="nodeMinDirect">4,33 Mt</div>
+            </div>
+            <div>
+              <div style="font-size:0.68rem; color:var(--on-surface-variant);">ESTÉRIL (90,01%)</div>
+              <div class="mono" style="font-weight:600; color:var(--on-surface-variant);" id="nodeWasteTotal">38,96 Mt</div>
+            </div>
+          </div>
+          <span class="flow-node-desc" style="margin-top:2px;">Relación estéril/mineral (REM): 9,01 t/t</span>
+        </div>
+
+        <div class="flow-arrow">
+          <i data-lucide="arrow-right" style="width:24px;height:24px;"></i>
+        </div>
+
+        <!-- Nodos de Destino Final -->
+        <div style="display:flex; flex-direction:column; gap:var(--space-xs);">
+          <div class="flow-node plant">
+            <span class="flow-node-title">Planta Concentradora (100%)</span>
+            <span class="flow-node-val mono" style="color:var(--positive);" id="nodePlantTotal">4,60 Mt</span>
+            <span class="flow-node-desc">4,33 Mt mina + 273.622 tn stock</span>
+          </div>
+          <div class="flow-node waste">
+            <span class="flow-node-title">Escombrera DUMP1</span>
+            <span class="flow-node-val mono" id="nodeDumpTotal">38,96 Mt</span>
+            <span class="flow-node-desc">14.593.486 m³ esponjados</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos y Simulador What-If -->
+      <div class="grid-12">
+        <!-- Gráfico 1: Comparativa Mineral vs Estéril -->
+        <div class="col-4">
+          <div class="carbon-card">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="pie-chart" style="width:16px;height:16px;color:var(--primary);"></i>
+                Composición de Masa en Pit
+              </span>
+              <span class="card-unit">% Toneladas</span>
+            </div>
+            <div class="chart-container-box" style="min-height:230px; display:flex; align-items:center; justify-content:center;">
+              <canvas id="massSplitDonut" style="max-height:210px;"></canvas>
+            </div>
+            <div style="font-size:0.75rem; color:var(--on-surface-variant); font-family:var(--font-label); display:flex; justify-content:space-between;">
+              <span>Mineral: 4.326.378 tn (9,99%)</span>
+              <span>Estéril: 38.964.608 tn (90,01%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico 2: Asignación por Destino Físico -->
+        <div class="col-4">
+          <div class="carbon-card">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="bar-chart-2" style="width:16px;height:16px;color:var(--primary);"></i>
+                Destino Físico de Materiales
+              </span>
+              <span class="card-unit">Millones de Toneladas</span>
+            </div>
+            <div class="chart-container-box" style="min-height:230px;">
+              <canvas id="destinationBarChart" style="max-height:210px;"></canvas>
+            </div>
+            <div style="font-size:0.75rem; color:var(--on-surface-variant); font-family:var(--font-label); display:flex; justify-content:space-between;">
+              <span>DUMP1: 38,96 Mt</span>
+              <span>Planta: 4,60 Mt</span>
+              <span>Stock remanente: 0,26 Mt</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Interactivo What-If de Alimentación a Planta y Stockpile -->
+        <div class="col-4">
+          <div class="sim-panel">
+            <div class="carbon-card-header" style="margin-bottom:0;">
+              <span class="card-title">
+                <i data-lucide="sliders" style="width:16px;height:16px;color:var(--primary);"></i>
+                Simulador Dinámico de Stockpile
+              </span>
+              <span class="card-unit">Ajuste de Demanda</span>
+            </div>
+
+            <p style="font-size:0.8rem; color:var(--on-surface-variant);">
+              Analice la resiliencia del stock regulador ante variaciones de la tasa de procesamiento de la planta concentradora en el Año 6:
+            </p>
+
+            <div class="sim-control-row">
+              <div>
+                <div class="sim-slider-label">
+                  <span>Capacidad Planta</span>
+                  <span id="sliderPlantVal" class="mono" style="font-weight:600; color:var(--primary);">4.600.000 t/a</span>
+                </div>
+                <input type="range" class="carbon-range" id="inputPlantCapacity" min="4200000" max="4800000" step="25000" value="4600000" oninput="updateMassSimulation(this.value)">
+              </div>
+              <div style="text-align:right;">
+                <span class="carbon-tag" id="stockStatusBadge">Equilibrio Nominal</span>
+              </div>
+            </div>
+
+            <div class="sim-results-grid">
+              <div class="sim-result-box">
+                <span class="sim-result-k">Consumo Stock</span>
+                <span class="sim-result-v mono" id="simStockDrawdown">273.622 t</span>
+              </div>
+              <div class="sim-result-box">
+                <span class="sim-result-k">Stock Remanente</span>
+                <span class="sim-result-v mono" id="simStockClosing">255.991 t</span>
+              </div>
+              <div class="sim-result-box">
+                <span class="sim-result-k">Autonomía Rem.</span>
+                <span class="sim-result-v mono" id="simAutonomyDays">20,3 días</span>
+              </div>
+            </div>
+
+            <div style="font-size:0.72rem; color:var(--on-surface-variant); border-top:1px solid var(--outline-variant); padding-top:var(--space-xs);">
+              * Stock inicial al abrir Año 6: <strong>529.613 tn</strong>. El consumo neto de 273.622 tn garantiza que la planta opere al 100% de su factor de carga sin interrupciones por stripping de estéril.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 5. RENDIMIENTO DE TRANSPORTE, LOGÍSTICA Y TIEMPOS DE CICLO -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">Módulo 03 &bull; Transporte y Productividad de Acarreo</span>
+          <h2 class="section-title">Rendimiento de Transporte, Logística y Tiempos de Ciclo (CAT 789)</h2>
+        </div>
+        <span class="section-desc">Ciclo promedio ponderado: 20,75 min | 279.606 viajes totales de camión | 90.143 horas camión operativas</span>
+      </div>
+
+      <div class="grid-12">
+        <!-- Columna 1: Tarjetas de Rutas y Tiempos de Ciclo -->
+        <div class="col-7">
+          <div class="carbon-card">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="navigation" style="width:16px;height:16px;color:var(--primary);"></i>
+                Tiempos de Ciclo y Despachos por Circuito de Transporte
+              </span>
+              <span class="card-unit">Camión CAT 789 (193 t nominal)</span>
+            </div>
+
+            <!-- Gráfico Comparativo de Ciclos Horizontales -->
+            <div class="chart-container-box" style="min-height:200px;">
+              <canvas id="cycleTimeHorizontalBar" style="max-height:180px;"></canvas>
+            </div>
+
+            <!-- Tabla Detallada de Rutas de Transporte -->
+            <div class="carbon-table-container">
+              <table class="carbon-table">
+                <thead>
+                  <tr>
+                    <th>Circuito Logístico</th>
+                    <th>Distancia</th>
+                    <th>T. Ciclo</th>
+                    <th>Viajes Anuales</th>
+                    <th class="text-right">Material Movido</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; color:var(--on-surface);">Pit &rarr; Escombrera DUMP1</div>
+                      <div style="font-size:0.7rem; color:var(--on-surface-variant);">Acarreo de estéril banco 800 a cota botadero</div>
+                    </td>
+                    <td class="mono">2,20 km</td>
+                    <td class="mono"><strong>19,00 min</strong></td>
+                    <td class="mono">251.385 viajes</td>
+                    <td class="mono text-right">38.964.608 tn</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; color:var(--primary);">Pit &rarr; Planta Concentradora</div>
+                      <div style="font-size:0.7rem; color:var(--on-surface-variant);">Mineral directo triturador primario</div>
+                    </td>
+                    <td class="mono">3,00 km</td>
+                    <td class="mono"><strong>23,00 min</strong></td>
+                    <td class="mono">26.542 viajes</td>
+                    <td class="mono text-right">4.326.378 tn</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; color:var(--warning);">Pit &rarr; Stockpile</div>
+                      <div style="font-size:0.7rem; color:var(--on-surface-variant);">Acopio temporal de mineral excedente</div>
+                    </td>
+                    <td class="mono">4,00 km</td>
+                    <td class="mono">28,00 min</td>
+                    <td class="mono">0 viajes</td>
+                    <td class="mono text-right">0 tn</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; color:var(--tertiary);">Stockpile &rarr; Planta Concentradora</div>
+                      <div style="font-size:0.7rem; color:var(--on-surface-variant);">Rehandling de amortiguación</div>
+                    </td>
+                    <td class="mono">1,00 km</td>
+                    <td class="mono"><strong>13,00 min</strong></td>
+                    <td class="mono">1.679 viajes</td>
+                    <td class="mono text-right">273.622 tn</td>
+                  </tr>
+                  <tr style="background-color: var(--surface-container-high); font-weight:600;">
+                    <td>TOTAL CONSOLIDADO MINA</td>
+                    <td class="mono">—</td>
+                    <td class="mono" style="color:var(--primary);">20,75 min (prom.)</td>
+                    <td class="mono">279.606 viajes</td>
+                    <td class="mono text-right">43.564.608 tn*</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:0.7rem; color:var(--on-surface-muted);">
+              * Incluye 43.290.986 tn extraídas en foso + 273.622 tn de rehandling cargadas desde el stockpile hacia el triturador.
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Columna 2: Match Factor y Parámetros Operativos de Flota -->
+        <div class="col-5">
+          <div class="mf-display-card">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="activity" style="width:16px;height:16px;color:var(--primary);"></i>
+                Match Factor y Sincronismo Pala-Camión
+              </span>
+              <span class="card-unit">Relación Dinámica</span>
+            </div>
+
+            <div class="mf-score-row">
+              <span class="mf-score mono" id="matchFactorVal">0,771</span>
+              <div>
+                <span class="mf-status-badge">
+                  <i data-lucide="check" style="width:12px;height:12px;"></i> Acoplamiento Eficiente
+                </span>
+                <div style="font-size:0.72rem; color:var(--on-surface-variant); margin-top:2px;">
+                  3 Palas CAT 6040 operando con 18 Camiones CAT 789
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; font-family:var(--font-label); font-size:0.72rem; margin-bottom:4px;">
+                <span>Nivel de Saturación de Pala</span>
+                <span class="mono" id="mfPercentText">77,1% (Objetivo 75-85%)</span>
+              </div>
+              <div class="mf-bar-wrap">
+                <div class="mf-bar-fill" id="mfBarFill"></div>
+                <div class="mf-bar-target" title="Objetivo Óptimo"></div>
+              </div>
+            </div>
+
+            <p style="font-size:0.78rem; color:var(--on-surface-variant); line-height:1.4;">
+              El índice <strong>0,771</strong> certifica un régimen de operación balanceado: ausencia absoluta de colas críticas de camiones en las bahías de carguío y minimización de paradas no programadas en tolva de trituración.
+            </p>
+
+            <!-- Desglose de Parámetros de Ciclo -->
+            <div style="background:var(--surface-container); padding:var(--space-sm); border-top:1px solid var(--outline-variant);">
+              <div style="font-family:var(--font-label); font-size:0.72rem; font-weight:600; text-transform:uppercase; color:var(--on-surface); margin-bottom:6px;">
+                Parámetros Cinemáticos de Transporte
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; font-size:0.75rem;">
+                <div class="spec-item">
+                  <span class="spec-k">Velocidad Cargado</span>
+                  <span class="spec-v mono">20,0 km/h</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Velocidad Vacío</span>
+                  <span class="spec-v mono">30,0 km/h</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Tiempo Maniobra y Espera</span>
+                  <span class="spec-v mono">8,00 min / ciclo</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Ciclo de Pala CAT 6040</span>
+                  <span class="spec-v mono">40 s (4 pasadas / camión)</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Carga Real Mineral</span>
+                  <span class="spec-v mono">158,04 tn / viaje</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-k">Carga Real Estéril</span>
+                  <span class="spec-v mono">150,16 tn / viaje</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="carbon-notification" style="margin-top:auto;">
+              <i data-lucide="info" style="width:16px;height:16px;color:var(--primary);flex-shrink:0;"></i>
+              <div style="font-size:0.75rem;">
+                <strong>Horas camión anuales:</strong> 90.143 hs operativas. Cobertura: 14 camiones propios + 4 bajo leasing transitorio.
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. PARQUE Y PICO DE EQUIPOS DE MINA (FLOTA ACTIVA EN AÑO 6) -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">Módulo 04 &bull; Dimensionamiento de Activos y Flota</span>
+          <h2 class="section-title">Parque y Pico de Equipos de Mina (Flota Activa en Año 6)</h2>
+        </div>
+        <span class="section-desc">Despliegue operativo máximo: 3 Palas CAT 6040, 18 Camiones CAT 789 (14 propios + 4 leasing), 3 Perforadoras PV271 y soporte auxiliar</span>
+      </div>
+
+      <div class="fleet-grid">
+        
+        <!-- Tarjeta 1: Palas CAT 6040 -->
+        <div class="fleet-unit-card primary-unit">
+          <div class="fleet-card-top">
+            <span class="fleet-model">Pala Hidráulica CAT 6040</span>
+            <span class="fleet-qty mono">3 U.</span>
+          </div>
+          <span class="carbon-tag" style="width:fit-content;">Carguío Primario</span>
+          <p class="fleet-unit-desc">
+            450 t peso operativo, balde de 22 m³ (capacidad 39,5 tn de mineral y 37,5 tn de estéril por pase). Ciclo de carga 40 seg, 4 pasadas por camión CAT 789.
+          </p>
+          <div class="fleet-metrics-strip">
+            <div>
+              <span class="fleet-m-k">Consumo Diésel</span>
+              <span class="fleet-m-v mono">210 L/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Rendimiento</span>
+              <span class="fleet-m-v mono">2.508 t/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Horas/Año</span>
+              <span class="fleet-m-v mono">5.957 h/u</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta 2: Camiones CAT 789 -->
+        <div class="fleet-unit-card primary-unit">
+          <div class="fleet-card-top">
+            <span class="fleet-model">Camión CAT 789 (193 t)</span>
+            <span class="fleet-qty mono">18 U.*</span>
+          </div>
+          <span class="carbon-tag green" style="width:fit-content;">14 Propios + 4 Leasing</span>
+          <p class="fleet-unit-desc">
+            Flota de acarreo de alta capacidad. 14 unidades propias de la base de compra CAPEX + 4 unidades contratadas bajo leasing transitorio ($100.000/mes) para sortear el pico sin sobrecosto de inversión.
+          </p>
+          <div class="fleet-metrics-strip">
+            <div>
+              <span class="fleet-m-k">Consumo Diésel</span>
+              <span class="fleet-m-v mono">140 L/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Capacidad Caja</span>
+              <span class="fleet-m-v mono">77 m³</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Horas Totales</span>
+              <span class="fleet-m-v mono">90.143 h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta 3: Perforadoras Epiroc PitViper 271 -->
+        <div class="fleet-unit-card drill-unit">
+          <div class="fleet-card-top">
+            <span class="fleet-model">Epiroc PitViper 271</span>
+            <span class="fleet-qty mono">3 U.</span>
+          </div>
+          <span class="carbon-tag purple" style="width:fit-content;">Perforación Rotativa</span>
+          <p class="fleet-unit-desc">
+            Taladros de 10,63" (270 mm). Malla 6,5 m burden &times; 7,5 m espaciamiento, 20 m altura de banco + 2 m sobreperforación. 15.052 pozos perforados al año (331.126 metros).
+          </p>
+          <div class="fleet-metrics-strip">
+            <div>
+              <span class="fleet-m-k">Consumo Diésel</span>
+              <span class="fleet-m-v mono">75 L/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Penetración</span>
+              <span class="fleet-m-v mono">20 m/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Roca / Pozo</span>
+              <span class="fleet-m-v mono">2.876 tn</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta 4: Tractores Oruga CAT D9 -->
+        <div class="fleet-unit-card support-unit">
+          <div class="fleet-card-top">
+            <span class="fleet-model">Bulldozer CAT D9</span>
+            <span class="fleet-qty mono">4 U.</span>
+          </div>
+          <span class="carbon-tag gray" style="width:fit-content;">Soporte de Foso y Botadero</span>
+          <p class="fleet-unit-desc">
+            Empuje masivo y mantenimiento de plataformas en foso, banco activo y cresta de descarga en la escombrera DUMP1.
+          </p>
+          <div class="fleet-metrics-strip">
+            <div>
+              <span class="fleet-m-k">Consumo Diésel</span>
+              <span class="fleet-m-v mono">52 L/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Disp. Mecánica</span>
+              <span class="fleet-m-v mono">85%</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Horas/Año</span>
+              <span class="fleet-m-v mono">4.468 h/u</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta 5: Wheeldozers CAT 824 -->
+        <div class="fleet-unit-card support-unit">
+          <div class="fleet-card-top">
+            <span class="fleet-model">Wheeldozer CAT 824</span>
+            <span class="fleet-qty mono">2 U.</span>
+          </div>
+          <span class="carbon-tag gray" style="width:fit-content;">Limpieza Rápida Frentes</span>
+          <p class="fleet-unit-desc">
+            Tracción sobre ruedas de alta agilidad para limpieza de derrames en zonas de carga de palas y acceso a rampa.
+          </p>
+          <div class="fleet-metrics-strip">
+            <div>
+              <span class="fleet-m-k">Consumo Diésel</span>
+              <span class="fleet-m-v mono">38 L/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Utilización</span>
+              <span class="fleet-m-v mono">55%</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Horas/Año</span>
+              <span class="fleet-m-v mono">3.854 h/u</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta 6: Motoniveladoras CAT 16 -->
+        <div class="fleet-unit-card support-unit">
+          <div class="fleet-card-top">
+            <span class="fleet-model">Motoniveladora CAT 16</span>
+            <span class="fleet-qty mono">2 U.</span>
+          </div>
+          <span class="carbon-tag gray" style="width:fit-content;">Mantenimiento de Pistas</span>
+          <p class="fleet-unit-desc">
+            Nivelación continua de pistas de rodadura y rampas de transporte para evitar degradación prematura de neumáticos CAT 789.
+          </p>
+          <div class="fleet-metrics-strip">
+            <div>
+              <span class="fleet-m-k">Consumo Diésel</span>
+              <span class="fleet-m-v mono">30 L/h</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Utilización</span>
+              <span class="fleet-m-v mono">60%</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Horas/Año</span>
+              <span class="fleet-m-v mono">4.205 h/u</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta 7: Flota de Servicios Auxiliares -->
+        <div class="fleet-unit-card support-unit">
+          <div class="fleet-card-top">
+            <span class="fleet-model">Servicios Auxiliares</span>
+            <span class="fleet-qty mono">23 U.</span>
+          </div>
+          <span class="carbon-tag gray" style="width:fit-content;">Riego, Combustible y Supervisión</span>
+          <p class="fleet-unit-desc">
+            2 Camiones Regadores (20 kL), 2 Camiones Cisterna combustible (20 kL), 2 Cargadores frontales CAT 930 y 15 Camionetas Toyota Hilux 4x4.
+          </p>
+          <div class="fleet-metrics-strip">
+            <div>
+              <span class="fleet-m-k">Hilux 4x4</span>
+              <span class="fleet-m-v mono">15 u. (3 L/h)</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Regadores</span>
+              <span class="fleet-m-v mono">2 u. (22 L/h)</span>
+            </div>
+            <div>
+              <span class="fleet-m-k">Cisternas</span>
+              <span class="fleet-m-v mono">2 u. (20 L/h)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Cost Summary Banner del Año 6 -->
+      <div class="cost-summary-box">
+        <div class="cost-item">
+          <span class="cost-k">Consumo Anual de Diésel</span>
+          <span class="cost-v mono">19,38 <span style="font-size:1rem;color:var(--on-surface-variant);">ML</span></span>
+          <span class="cost-sub">$25,20 MUSD @ $1,30/L ($0,58/t)</span>
+        </div>
+        <div class="cost-item">
+          <span class="cost-k">OPEX Directo Mina</span>
+          <span class="cost-v mono">$66,30 <span style="font-size:1rem;color:var(--on-surface-variant);">M</span></span>
+          <span class="cost-sub">Costo de extracción: $1,53/t movilizada</span>
+        </div>
+        <div class="cost-item">
+          <span class="cost-k">Costo de Procesamiento</span>
+          <span class="cost-v mono">$69,00 <span style="font-size:1rem;color:var(--on-surface-variant);">M</span></span>
+          <span class="cost-sub">4,60 Mt concentradas @ $15,00/t</span>
+        </div>
+        <div class="cost-item">
+          <span class="cost-k">OPEX Consolidado Año 6</span>
+          <span class="cost-v mono" style="color:var(--primary);">$135,30 <span style="font-size:1rem;">M</span></span>
+          <span class="cost-sub">Mina + Planta + Soporte Operativo</span>
+        </div>
+      </div>
+
+      <!-- Desglose Gráfico del OPEX del Año 6 -->
+      <div class="grid-12">
+        <div class="col-6">
+          <div class="carbon-card">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="pie-chart" style="width:16px;height:16px;color:var(--primary);"></i>
+                Estructura del Costo Operativo Consolidado (Año 6)
+              </span>
+              <span class="card-unit">Total: $135,30 MUSD</span>
+            </div>
+            <div class="chart-container-box" style="min-height:240px; display:flex; align-items:center; justify-content:center;">
+              <canvas id="opexStructureDonut" style="max-height:220px;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="carbon-card">
+            <div class="carbon-card-header">
+              <span class="card-title">
+                <i data-lucide="table" style="width:16px;height:16px;color:var(--primary);"></i>
+                Desglose Detallado de Rubros de OPEX en Mina (Año 6)
+              </span>
+              <span class="card-unit">Costo Total vs Unitario</span>
+            </div>
+            <div class="carbon-table-container">
+              <table class="carbon-table">
+                <thead>
+                  <tr>
+                    <th>Rubro Operativo</th>
+                    <th>Costo Anual (USD)</th>
+                    <th>Costo / Tonelada</th>
+                    <th class="text-right">% Mina</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Combustible (Diésel)</strong></td>
+                    <td class="mono">$25.200.391,32</td>
+                    <td class="mono">$0,58 /t</td>
+                    <td class="mono text-right">38,01%</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Servicios y Gastos Op.</strong> (inc. leasing $4,8M)</td>
+                    <td class="mono">$24.692.499,00</td>
+                    <td class="mono">$0,57 /t</td>
+                    <td class="mono text-right">37,25%</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Mano de Obra</strong></td>
+                    <td class="mono">$7.981.800,00</td>
+                    <td class="mono">$0,18 /t</td>
+                    <td class="mono text-right">12,04%</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Mantenimiento y Reparaciones</strong></td>
+                    <td class="mono">$4.510.500,00</td>
+                    <td class="mono">$0,10 /t</td>
+                    <td class="mono text-right">6,80%</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Neumáticos (Flota pesada y liviana)</strong></td>
+                    <td class="mono">$2.632.950,00</td>
+                    <td class="mono">$0,06 /t</td>
+                    <td class="mono text-right">3,97%</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Aceros de Perforación</strong></td>
+                    <td class="mono">$1.278.500,00</td>
+                    <td class="mono">$0,03 /t</td>
+                    <td class="mono text-right">1,93%</td>
+                  </tr>
+                  <tr style="background-color:var(--surface-container-high); font-weight:600;">
+                    <td>SUBTOTAL MINA</td>
+                    <td class="mono">$66.296.640,32</td>
+                    <td class="mono">$1,53 /t</td>
+                    <td class="mono text-right">100,0%</td>
+                  </tr>
+                  <tr style="border-top:2px solid var(--outline-variant); font-weight:600; color:var(--primary);">
+                    <td>PLANTA DE BENEFICIO ($15/t)</td>
+                    <td class="mono">$69.000.000,00</td>
+                    <td class="mono">$15,00 /t mineral</td>
+                    <td class="mono text-right">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- FOOTER DE AUDITORÍA Y METADATOS TÉCNICOS -->
+    <footer class="dashboard-footer">
+      <div>
+        <span>Fuente: TP Integrado Proyecto Minero 2026 - Gómez, Astudillo &bull; Anexo - Proyecto Minero 2026 - Astudillo, Gómez</span>
+      </div>
+      <div>
+        <span>Planificación Mediano Plazo - Y6/26</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <api-shim></api-shim>
+
+  <script>
+    // Variable global para almacenar instancias de Chart.js
+    let donutChartInstance = null;
+    let barChartInstance = null;
+    let cycleBarInstance = null;
+    let opexChartInstance = null;
+
+    // Inicialización del Dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      // 1. Renderizar iconos de Lucide
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+
+      // 2. Inicializar los gráficos interactivos
+      initMassSplitDonut();
+      initDestinationBarChart();
+      initCycleTimeBarChart();
+      initOpexStructureDonut();
+    });
+
+    // Gráfico 1: Masa en Pit (Donut)
+    function initMassSplitDonut() {
+      const ctx = document.getElementById('massSplitDonut');
+      if (!ctx) return;
+
+      donutChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Estéril (Waste)', 'Mineral (Ore)'],
+          datasets: [{
+            data: [38964608, 4326378],
+            backgroundColor: ['#525252', '#0f62fe'],
+            borderColor: '#ffffff',
+            borderWidth: 2,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                font: { family: "'IBM Plex Mono', monospace", size: 11 },
+                color: '#161616'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              titleColor: '#161616',
+              bodyColor: '#525252',
+              borderColor: '#e0e0e0',
+              borderWidth: 1,
+              titleFont: { family: "'IBM Plex Sans', sans-serif", weight: '600' },
+              bodyFont: { family: "'IBM Plex Mono', monospace" },
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw;
+                  const total = 43290986;
+                  const pct = ((val / total) * 100).toFixed(2);
+                  const mt = (val / 1000000).toFixed(2);
+                  return ` ${context.label}: ${mt} Mt (${pct}%)`;
+                }
+              }
+            }
+          },
+          cutout: '68%'
+        }
+      });
+    }
+
+    // Gráfico 2: Asignación por Destino Físico (Bar)
+    function initDestinationBarChart() {
+      const ctx = document.getElementById('destinationBarChart');
+      if (!ctx) return;
+
+      barChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Escombrera (DUMP1)', 'Planta (Foso + Stock)', 'Remanente Stock'],
+          datasets: [{
+            label: 'Millones de Toneladas (Mt)',
+            data: [38.96, 4.60, 0.26],
+            backgroundColor: ['#8d8d8d', '#0f62fe', '#b28600'],
+            borderRadius: 0,
+            barThickness: 28
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              titleColor: '#161616',
+              bodyColor: '#525252',
+              borderColor: '#e0e0e0',
+              borderWidth: 1,
+              titleFont: { family: "'IBM Plex Sans', sans-serif", weight: '600' },
+              bodyFont: { family: "'IBM Plex Mono', monospace" },
+              callbacks: {
+                label: function(context) {
+                  return ` Tonelaje: ${context.raw} Mt`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: "'IBM Plex Mono', monospace", size: 10 }, color: '#525252' }
+            },
+            y: {
+              grid: { color: '#e0e0e0' },
+              ticks: {
+                font: { family: "'IBM Plex Mono', monospace", size: 10 },
+                color: '#525252',
+                callback: function(value) { return value + ' Mt'; }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Gráfico 3: Tiempos de Ciclo Horizontales (Horizontal Bar)
+    function initCycleTimeBarChart() {
+      const ctx = document.getElementById('cycleTimeHorizontalBar');
+      if (!ctx) return;
+
+      cycleBarInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Stockpile → Planta', 'Pit → Escombrera DUMP1', 'Ciclo Promedio Mina', 'Pit → Planta', 'Pit → Stockpile'],
+          datasets: [{
+            label: 'Tiempo de Ciclo (minutos)',
+            data: [13.00, 19.00, 20.75, 23.00, 28.00],
+            backgroundColor: ['#198038', '#525252', '#0f62fe', '#0f62fe', '#b28600'],
+            borderRadius: 0,
+            barThickness: 16
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              titleColor: '#161616',
+              bodyColor: '#525252',
+              borderColor: '#e0e0e0',
+              borderWidth: 1,
+              bodyFont: { family: "'IBM Plex Mono', monospace" },
+              callbacks: {
+                label: function(context) {
+                  return ` Duración: ${context.raw.toFixed(2)} min`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: '#e0e0e0' },
+              ticks: {
+                font: { family: "'IBM Plex Mono', monospace", size: 10 },
+                color: '#525252',
+                callback: function(v) { return v + ' m'; }
+              },
+              max: 32
+            },
+            y: {
+              grid: { display: false },
+              ticks: { font: { family: "'IBM Plex Sans', sans-serif", size: 11 }, color: '#161616' }
+            }
+          }
+        }
+      });
+    }
+
+    // Gráfico 4: Estructura del Costo Operativo Consolidado (Donut)
+    function initOpexStructureDonut() {
+      const ctx = document.getElementById('opexStructureDonut');
+      if (!ctx) return;
+
+      opexChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: [
+            'Procesamiento Planta ($15/t)',
+            'Combustible Mina ($1,30/L)',
+            'Servicios y Gastos (inc. leasing)',
+            'Mano de Obra',
+            'Mantenimiento y Repuestos',
+            'Neumáticos OTR y Livianos',
+            'Aceros de Perforación'
+          ],
+          datasets: [{
+            data: [69.00, 25.20, 24.69, 7.98, 4.51, 2.63, 1.28],
+            backgroundColor: [
+              '#0f62fe', // Azul planta
+              '#6929c4', // Púrpura diésel
+              '#005d5d', // Teal gastos
+              '#b28600', // Ámbar mano de obra
+              '#9f1853', // Magenta mant
+              '#8d8d8d', // Gris neumáticos
+              '#198038'  // Verde aceros
+            ],
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 10,
+                font: { family: "'IBM Plex Sans', sans-serif", size: 10 },
+                color: '#161616'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#ffffff',
+              titleColor: '#161616',
+              bodyColor: '#525252',
+              borderColor: '#e0e0e0',
+              borderWidth: 1,
+              titleFont: { family: "'IBM Plex Sans', sans-serif", weight: '600' },
+              bodyFont: { family: "'IBM Plex Mono', monospace" },
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw;
+                  const pct = ((val / 135.29) * 100).toFixed(1);
+                  return ` ${context.label}: $${val.toFixed(2)} M (${pct}%)`;
+                }
+              }
+            }
+          },
+          cutout: '62%'
+        }
+      });
+    }
+
+    // Interacción 1: Selección de Pushbacks y Bancos
+    function selectBench(pb, banco, title, tn, material, flota, cota, dist) {
+      const codeEl = document.getElementById('benchDetailCode');
+      const titleEl = document.getElementById('benchDetailTitle');
+      const tagEl = document.getElementById('benchDetailTag');
+      const cotaEl = document.getElementById('benchSpecCota');
+      const distEl = document.getElementById('benchSpecDist');
+      const matEl = document.getElementById('benchSpecMaterial');
+      const flotaEl = document.getElementById('benchSpecFlota');
+
+      if (!codeEl || !titleEl || !tagEl || !cotaEl || !distEl || !matEl || !flotaEl) return;
+
+      codeEl.textContent = `${pb}: B${banco}`;
+      titleEl.textContent = `${pb} — ${title}`;
+      cotaEl.textContent = cota;
+      distEl.textContent = dist;
+      matEl.textContent = material;
+      flotaEl.textContent = flota;
+
+      if (pb === 'PB2') {
+        tagEl.textContent = 'Mineral Primario';
+        tagEl.className = 'carbon-tag green';
+      } else if (pb === 'PB3') {
+        tagEl.textContent = 'Frente Avance';
+        tagEl.className = 'carbon-tag gray';
+      } else {
+        tagEl.textContent = 'Destape Superior';
+        tagEl.className = 'carbon-tag purple';
+      }
+    }
+
+    // Interacción 2: Simulador What-If de Stockpile
+    function updateMassSimulation(targetCapacity) {
+      const cap = parseFloat(targetCapacity);
+      const minDirectMina = 4326378; // Toneladas fijas extraídas en foso
+      const stockInicial = 529613;   // Stockpile remanente al cierre del Año 5
+
+      // Cálculo dinámico
+      const drawdownReq = Math.max(0, cap - minDirectMina);
+      const stockRemanente = stockInicial - drawdownReq;
+      const daysAutonomy = stockRemanente > 0 ? ((stockRemanente / (cap / 365))).toFixed(1) : '0,0';
+
+      // Actualizar DOM
+      const sliderText = document.getElementById('sliderPlantVal');
+      const drawText = document.getElementById('simStockDrawdown');
+      const remText = document.getElementById('simStockClosing');
+      const autText = document.getElementById('simAutonomyDays');
+      const badge = document.getElementById('stockStatusBadge');
+      const nodePlant = document.getElementById('nodePlantTotal');
+
+      if (sliderText) sliderText.textContent = `${(cap / 1000000).toFixed(2)} Mt (${cap.toLocaleString('es-ES')} t/a)`;
+      if (drawText) drawText.textContent = `${Math.round(drawdownReq).toLocaleString('es-ES')} t`;
+      if (remText) {
+        if (stockRemanente >= 0) {
+          remText.textContent = `${Math.round(stockRemanente).toLocaleString('es-ES')} t`;
+          remText.style.color = 'var(--on-surface)';
+        } else {
+          remText.textContent = `Déficit: ${Math.round(Math.abs(stockRemanente)).toLocaleString('es-ES')} t`;
+          remText.style.color = 'var(--error)';
+        }
+      }
+      if (autText) autText.textContent = `${daysAutonomy} días`;
+      if (nodePlant) nodePlant.textContent = `${(cap / 1000000).toFixed(2)} Mt`;
+
+      if (badge) {
+        if (stockRemanente < 0) {
+          badge.textContent = 'Déficit de Stock';
+          badge.className = 'carbon-tag';
+          badge.style.backgroundColor = '#ffd7d9';
+          badge.style.color = '#da1e28';
+        } else if (stockRemanente < 150000) {
+          badge.textContent = 'Alerta Stock Bajo';
+          badge.className = 'carbon-tag';
+          badge.style.backgroundColor = '#fdf3c6';
+          badge.style.color = '#8e6b00';
+        } else {
+          badge.textContent = 'Operación Segura';
+          badge.className = 'carbon-tag green';
+          badge.style.backgroundColor = '#defbe6';
+          badge.style.color = '#0e6027';
+        }
+      }
+    }
+
+    // Restablecer el simulador a valores nominales de ingeniería
+    function resetSimulator() {
+      const slider = document.getElementById('inputPlantCapacity');
+      if (slider) {
+        slider.value = 4600000;
+        updateMassSimulation(4600000);
+      }
+      selectBench('PB2', '800-760', 'Extracción Mineral Profundo', '30.520.986 tn', 'Mineral 4,33 Mt + Estéril 26,19 Mt', '1 Pala CAT 6040 + 7 CAT 789', '780 m media', '0,85 km');
+    }
+  </script>
+</body>
+</html>
